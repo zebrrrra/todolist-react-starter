@@ -1,74 +1,77 @@
 import { Footer, Header, TodoCollection, TodoInput } from 'components';
-import { useState } from 'react';
-
-const dummyTodos = [
-  {
-    title: 'Learn react-router',
-    isDone: true,
-    id: 1,
-  },
-  {
-    title: 'Learn to create custom hooks',
-    isDone: false,
-    id: 2,
-  },
-  {
-    title: 'Learn to use context',
-    isDone: true,
-    id: 3,
-  },
-  {
-    title: 'Learn to implement auth',
-    isDone: false,
-    id: 4,
-  },
-];
+import { useEffect, useState } from 'react';
+import { getTodos, createTodo, patchTodo, deleteTodo } from '../api/todos';
+import { checkPermission } from 'api/auth';
+import { useNavigate } from 'react-router-dom';
 
 const TodoPage = () => {
   const [inputValue, setInputValue] = useState('');
   const handleChange = (value) => setInputValue(value);
 
-  const [todos, setTodos] = useState(dummyTodos);
-  const handleAddTodo = () => {
+  const [todos, setTodos] = useState([]);
+  const navigate = useNavigate();
+
+  const handleAddTodo = async () => {
     if (inputValue.length === 0) return;
-    setTodos((prevTodos) => {
-      return [
-        ...prevTodos,
-        {
-          id: Math.random() * 100,
-          title: inputValue,
-          isDone: false,
-        },
-      ];
-    });
-    setInputValue('');
-  };
-  const handleKeyDown = () => {
-    if (inputValue.length === 0) return;
-    setTodos((prevTodos) => {
-      return [
-        ...prevTodos,
-        {
-          id: Math.random() * 100,
-          title: inputValue,
-          isDone: false,
-        },
-      ];
-    });
-    setInputValue('');
-  };
-  const handleToggleDone = (id) => {
-    setTodos((preTodos) => {
-      return preTodos.map((preTodo) => {
-        if (preTodo.id === id) {
-          return {
-            ...preTodo,
-            isDone: !preTodo.isDone,
-          };
-        }
-        return preTodo;
+    try {
+      const data = await createTodo({ title: inputValue, isDone: false });
+      setTodos((prevTodos) => {
+        return [
+          ...prevTodos,
+          {
+            id: data.id,
+            title: data.title,
+            isDone: data.isDone,
+            isEdit: false,
+          },
+        ];
       });
-    });
+      setInputValue('');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const handleKeyDown = async () => {
+    if (inputValue.length === 0) return;
+    try {
+      const data = await createTodo({ title: inputValue, isDone: false });
+      setTodos((prevTodos) => {
+        return [
+          ...prevTodos,
+          {
+            id: data.id,
+            title: data.title,
+            isDone: data.isDone,
+            isEdit: false,
+          },
+        ];
+      });
+      setInputValue('');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleToggleDone = async (id) => {
+    // currentTodo取得當前修改的todo
+    const currentTodo = todos.find((todo) => todo.id === id);
+
+    try {
+      await patchTodo({ id, isDone: !currentTodo.isDone });
+      setTodos((preTodos) => {
+        return preTodos.map((preTodo) => {
+          if (preTodo.id === id) {
+            return {
+              ...preTodo,
+              isDone: !preTodo.isDone,
+            };
+          }
+          return preTodo;
+        });
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
   const handleChangeMode = ({ id, isEdit }) => {
     setTodos((preTodos) => {
@@ -83,23 +86,64 @@ const TodoPage = () => {
       });
     });
   };
-  const handleSave = ({ id, title }) => {
-    setTodos((preTodos) => {
-      return preTodos.map((preTodo) => {
-        if (preTodo.id === id) {
-          return {
-            ...preTodo,
-            title,
-            isEdit: false,
-          };
-        }
-        return preTodo;
+  const handleSave = async ({ id, title }) => {
+    try {
+      await patchTodo({ id, title });
+      setTodos((preTodos) => {
+        return preTodos.map((preTodo) => {
+          if (preTodo.id === id) {
+            return {
+              ...preTodo,
+              title,
+              isEdit: false,
+            };
+          }
+          return preTodo;
+        });
       });
-    });
+    } catch (error) {
+      console.error(error);
+    }
   };
-  const handleDelete = ({ id }) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
+  const handleDelete = async ({ id }) => {
+    try {
+      await deleteTodo(id);
+      setTodos(todos.filter((todo) => todo.id !== id));
+    } catch (error) {
+      console.error(error);
+    }
   };
+  // 請求todo資料
+  useEffect(() => {
+    const getTodosAsync = async () => {
+      try {
+        const todos = await getTodos();
+        setTodos(todos.map((todo) => ({ ...todo, isEdit: false })));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getTodosAsync();
+  }, []);
+  
+// 驗證authToken
+  useEffect(() => {
+    const checkTokenIsValid = async () => {
+      const authToken = localStorage.getItem('authToken');
+
+      // authToken存在與否
+      if (!authToken) {
+        navigate('/login');
+      }
+
+      const success = await checkPermission(authToken);
+      // authToken正確與否
+      if (!success) {
+        navigate('/login');
+      }
+    };
+    checkTokenIsValid();
+  }, [navigate]);
   return (
     <div>
       TodoPage
