@@ -1,19 +1,14 @@
 {
   "todos": [
     {
-      "title": "Learn to implement auth",
-      "isDone": false,
-      "id": 4
+      "title": "tyu",
+      "isDone": true,
+      "id": 1
     },
     {
-      "title": "Learn to use fish",
+      "title": "jiuo;;k",
       "isDone": false,
-      "id": 5
-    },
-    {
-      "title": "grt",
-      "isDone": false,
-      "id": 6
+      "id": 2
     }
   ]
 }

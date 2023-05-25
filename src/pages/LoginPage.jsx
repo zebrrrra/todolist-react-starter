@@ -8,22 +8,21 @@ import { ACLogoIcon } from 'assets/images';
 import { AuthInput } from 'components';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { login, checkPermission } from 'api/auth';
 import Swal from 'sweetalert2';
+import { useAuth } from 'contexts/AuthContext';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const handleClick = async () => {
     if (username.length === 0) return;
     if (password.length === 0) return;
-    const { success, authToken } = await login({ username, password });
+    const success = await login({ username, password });
     // 如果登入成功
     if (success) {
-      // 取得authToken並存入localStorage
-      localStorage.setItem('authToken', authToken);
       Swal.fire({
         title: '登入成功',
         icon: 'success',
@@ -31,8 +30,6 @@ const LoginPage = () => {
         timer: 1000,
         position: 'top',
       });
-      // 導向todo頁面
-      navigate('/todo');
       return;
     }
     Swal.fire({
@@ -43,19 +40,13 @@ const LoginPage = () => {
       position: 'top',
     });
   };
+
   useEffect(() => {
-    const checkTokenIsValid = async () => {
-      const authToken = localStorage.getItem('authToken');
-      if (!authToken) return;
+    if (isAuthenticated) {
+      navigate('/todo');
+    }
+  }, [navigate, isAuthenticated]);
 
-      const success = await checkPermission(authToken);
-
-      if (success) {
-        navigate('/todo');
-      }
-    };
-    checkTokenIsValid();
-  }, [navigate]);
   return (
     <AuthContainer>
       <div>
