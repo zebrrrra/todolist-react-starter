@@ -1,5 +1,6 @@
 {
   "name": "todolist-react",
+  "homepage": "https://zebrrrra.github.io/todolist-react-starter",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -8,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.27.2",
     "clsx": "^1.2.1",
+    "gh-pages": "^4.0.0",
     "json-server": "^0.17.0",
     "jsonwebtoken": "^8.5.1",
     "prettier": "^2.8.8",
@@ -26,7 +28,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "format": "prettier --write \"**/*.+(js|jsx)\""
+    "format": "prettier --write \"**/*.+(js|jsx)\"",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
