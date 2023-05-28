@@ -3,7 +3,7 @@ import { TodoPage, LoginPage, SignUpPage, HomePage } from './pages';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from 'contexts/AuthContext';
 function App() {
-  const basename=process.env.PUBLIC_URL
+  const basename = process.env.PUBLIC_URL;
   return (
     <div className="app">
       <BrowserRouter basename={basename}>
