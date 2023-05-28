@@ -9,7 +9,7 @@ const TodoPage = () => {
   const handleChange = (value) => setInputValue(value);
 
   const [todos, setTodos] = useState([]);
-  const { isAuthenticated,currentMember } = useAuth();
+  const { isAuthenticated, currentMember } = useAuth();
   const navigate = useNavigate();
 
   const handleAddTodo = async () => {

@@ -32,9 +32,9 @@ const StyledButton = styled.button`
 `;
 
 const Footer = ({ todos }) => {
-  const{logout}=useAuth()
+  const { logout } = useAuth();
   const handleClick = () => {
-    logout()
+    logout();
   };
   return (
     <StyledFooter>
